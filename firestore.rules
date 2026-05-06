@@ -1,0 +1,123 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && 
+        (request.auth.token.get('email', '') == 'clasesdejohan@gmail.com' ||
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+    }
+
+    function isValidId(id) {
+       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validations ---
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'role']) &&
+             data.uid is string && data.email is string &&
+             data.role in ['student', 'admin'] &&
+             data.email.size() < 200 &&
+             (!('displayName' in data) || data.displayName is string) &&
+             (!('photoURL' in data) || (data.photoURL == null || data.photoURL is string)) &&
+             (!('createdAt' in data) || data.createdAt is string);
+    }
+
+    function isValidCourse(data) {
+      return data.keys().hasAll(['title', 'instructorId']) &&
+             data.title is string && data.title.size() <= 200;
+    }
+
+    function isValidProgress(data) {
+      return data.keys().hasAll(['userId', 'courseId', 'status']) &&
+             data.userId == request.auth.uid &&
+             data.status in ['enrolled', 'completed'];
+    }
+
+    // --- Collection Matches ---
+
+    // Users
+    match /users/{userId} {
+      allow get: if isValidId(userId); // Profiles are public to allow certificate verification
+      allow list: if isAdmin();
+      allow create: if isValidId(userId) && isSignedIn() && isOwner(userId) && isValidUser(incoming()) && 
+        (incoming().role == 'student' || incoming().email == 'clasesdejohan@gmail.com');
+      allow update: if isValidId(userId) && isSignedIn() && (
+        (isOwner(userId) && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL'])) ||
+        isAdmin()
+      );
+    }
+
+    // Courses
+    match /courses/{courseId} {
+      allow read: if true; // Courses are public
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() && isValidCourse(incoming());
+
+      // Nested Modules
+      match /modules/{moduleId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
+      // Nested Lessons
+      match /modules/{moduleId}/lessons/{lessonId} {
+        // Only allow reading lessons if user is signed in.
+        // We could also check if user is enrolled in course via 'progress' collection, but for simplicity we allow signed in users.
+        allow read: if isSignedIn();
+        allow write: if isAdmin();
+      }
+
+      // Nested Exams
+      match /exams/{examId} {
+        allow read: if isSignedIn();
+        allow write: if isAdmin();
+      }
+    }
+
+    // Progress
+    match /progress/{progressId} {
+      allow get: if (resource.data.status == 'completed') || (isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()));
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidProgress(incoming());
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin()) && 
+                    incoming().diff(existing()).affectedKeys().hasAny(['completedLessons', 'status', 'lastAccessedAt']);
+    }
+
+    // Certificates
+    match /certificates/{certId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAdmin(); // Only system/admin can issue certificates
+      allow delete: if isAdmin();
+    }
+
+    // Global Settings
+    match /settings/general {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

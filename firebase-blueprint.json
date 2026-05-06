@@ -1,0 +1,156 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information and roles.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "admin"] },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "Educational course metadata.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "level": { "type": "string", "enum": ["beginner", "intermediate", "expert"] },
+        "category": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "instructorId": { "type": "string" },
+        "isPublished": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "instructorId"]
+    },
+    "Module": {
+      "title": "Module",
+      "description": "A group of lessons within a course.",
+      "type": "object",
+      "properties": {
+        "courseId": { "type": "string" },
+        "title": { "type": "string" },
+        "order": { "type": "number" }
+      },
+      "required": ["courseId", "title", "order"]
+    },
+    "Lesson": {
+      "title": "Lesson",
+      "description": "Individual learning unit.",
+      "type": "object",
+      "properties": {
+        "moduleId": { "type": "string" },
+        "courseId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string", "description": "HTML or AI generated text" },
+        "videoUrl": { "type": "string" },
+        "order": { "type": "number" }
+      },
+      "required": ["moduleId", "courseId", "title", "order"]
+    },
+    "Exam": {
+      "title": "Exam",
+      "description": "Assessment for a course.",
+      "type": "object",
+      "properties": {
+        "courseId": { "type": "string" },
+        "title": { "type": "string" },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "text": { "type": "string" },
+              "options": { "type": "array", "items": { "type": "string" } },
+              "correctAnswer": { "type": "number" }
+            }
+          }
+        },
+        "passingScore": { "type": "number" }
+      },
+      "required": ["courseId", "questions"]
+    },
+    "Progress": {
+      "title": "Progress",
+      "description": "Tracks student progress in a course.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "courseId": { "type": "string" },
+        "completedLessons": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["enrolled", "completed"] },
+        "enrolledAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "lastAccessedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "courseId", "status"]
+    },
+    "Certificate": {
+      "title": "Certificate",
+      "description": "Proof of course completion.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "courseId": { "type": "string" },
+        "userName": { "type": "string" },
+        "courseTitle": { "type": "string" },
+        "issuedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "courseId", "userName", "courseTitle"]
+    },
+    "GeneralSettings": {
+      "title": "General Settings",
+      "description": "Global application configuration.",
+      "type": "object",
+      "properties": {
+        "academyName": { "type": "string" },
+        "academicDirector": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["academicDirector"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Individual user profiles."
+    },
+    "settings/general": {
+      "schema": "GeneralSettings",
+      "description": "Global academy settings."
+    },
+    "courses/{courseId}": {
+      "schema": "Course",
+      "description": "Course information."
+    },
+    "courses/{courseId}/modules/{moduleId}": {
+      "schema": "Module",
+      "description": "Modules within a course."
+    },
+    "courses/{courseId}/modules/{moduleId}/lessons/{lessonId}": {
+      "schema": "Lesson",
+      "description": "Lessons within a module."
+    },
+    "courses/{courseId}/exams/{examId}": {
+      "schema": "Exam",
+      "description": "Course exams."
+    },
+    "progress/{progressId}": {
+      "schema": "Progress",
+      "description": "User course progress tracks."
+    },
+    "certificates/{certId}": {
+      "schema": "Certificate",
+      "description": "Issued certificates."
+    }
+  }
+}

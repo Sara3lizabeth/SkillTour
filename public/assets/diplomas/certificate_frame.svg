@@ -1,0 +1,40 @@
+<svg width="1000" pill-color="#ff004c" height="707" viewBox="0 0 1000 707" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Base -->
+  <rect width="1000" height="707" fill="#FFFFFF"/>
+  
+  <!-- Subtle Micro-Pattern -->
+  <defs>
+    <pattern id="dotPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.5" fill="#0A0C10" fill-opacity="0.05"/>
+    </pattern>
+    <linearGradient id="primaryGrad" x1="0" y1="0" x2="1000" y2="707" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A0C10"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </linearGradient>
+  </defs>
+  <rect width="1000" height="707" fill="url(#dotPattern)"/>
+
+  <!-- Outer Frame: Dark Blue -->
+  <rect x="20" y="20" width="960" height="667" stroke="#0A0C10" stroke-width="2"/>
+  <rect x="30" y="30" width="940" height="647" stroke="#0A0C10" stroke-width="0.5" stroke-dasharray="4 4"/>
+
+  <!-- Inner Frame: Bold Red Accents -->
+  <path d="M50 50H150M50 50V150" stroke="#ff004c" stroke-width="6" stroke-linecap="square"/>
+  <path d="M950 50H850M950 50V150" stroke="#ff004c" stroke-width="6" stroke-linecap="square"/>
+  <path d="M50 657H150M50 657V557" stroke="#ff004c" stroke-width="6" stroke-linecap="square"/>
+  <path d="M950 657H850M950 657V557" stroke="#ff004c" stroke-width="6" stroke-linecap="square"/>
+
+  <!-- Central Watermark Symbol -->
+  <g opacity="0.03">
+    <circle cx="500" cy="353" r="180" stroke="#0A0C10" stroke-width="1"/>
+    <circle cx="500" cy="353" r="160" stroke="#0A0C10" stroke-width="0.5"/>
+    <path d="M500 250V456M400 353H600" stroke="#0A0C10" stroke-width="0.5"/>
+  </g>
+
+  <!-- Side Text Decorations -->
+  <text x="40" y="353" transform="rotate(-90 40 353)" fill="#0A0C10" fill-opacity="0.2" font-family="sans-serif" font-weight="bold" font-size="10" letter-spacing="0.5em">EXCELLENCE • INTEGRITY • KNOWLEDGE</text>
+  <text x="960" y="353" transform="rotate(90 960 353)" fill="#0A0C10" fill-opacity="0.2" font-family="sans-serif" font-weight="bold" font-size="10" letter-spacing="0.5em">EXCELLENCE • INTEGRITY • KNOWLEDGE</text>
+
+  <!-- Bottom Validation Strip -->
+  <rect x="50" y="620" width="900" height="1" fill="#E2E8F0"/>
+</svg>
